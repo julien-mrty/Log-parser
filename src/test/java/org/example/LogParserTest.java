@@ -5,13 +5,14 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Assertions.*;
 
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LogParserTest {
 
-    private LogParser parser = new LogParser();
+    private final LogParser parser = new LogParser();
 
     @Test
     void readFile() {
@@ -41,6 +42,15 @@ public class LogParserTest {
         assertEquals(LogLevel.DEBUG, LogParser.convertStringToLogLevel("DEBUG").get());
         assertEquals(LogLevel.TRACE, LogParser.convertStringToLogLevel("TRACE").get());
         assertEquals(Optional.empty(), LogParser.convertStringToLogLevel("wrong"));
+    }
 
+    @Test
+    void convertStringToLocalDateTime() {
+        LocalDateTime now = LocalDateTime.now(); // Get current date-time
+        String sNow = now.format(parser.getFormatter()); // Format it and return a String
+        now = LocalDateTime.parse(sNow, parser.getFormatter()); // Use the well formatted String to create a date-time
+
+        assertEquals(now, parser.convertStringToLocalDateTime(sNow).get());
+        assertEquals(Optional.empty(), parser.convertStringToLocalDateTime("wrong"));
     }
 }

@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,10 @@ public class LogParser {
         this.logPattern = logPattern;
     }
 
+    public DateTimeFormatter getFormatter() {
+        return formatter;
+    }
+
     public void createJsonFromLogFile(String logFileName, String JsonFileName) {
         List<LogEntry> logs = new ArrayList<>();
 
@@ -58,7 +63,11 @@ public class LogParser {
         }
         System.out.println("matcher.group(\"date\"): " + matcher.group("date"));
 
-        LocalDateTime dateTime = convertStringToLocalDateTime(matcher.group("date") + " " + matcher.group("time"));
+        Optional<LocalDateTime> dateTime = convertStringToLocalDateTime(matcher.group("date") + " " + matcher.group("time"));
+        if (dateTime.isEmpty()) {
+            System.out.println("Date/Time, incorrect format: " + line);
+            return Optional.empty();
+        }
 
         Optional<LogLevel> logLevel = convertStringToLogLevel(matcher.group("level"));
         if (logLevel.isEmpty()) {
@@ -76,7 +85,7 @@ public class LogParser {
         }
 
         return Optional.of(new LogEntry(
-                dateTime,
+                dateTime.get(),
                 logLevel.get(),
                 matcher.group("file"),
                 lineNum,
@@ -96,7 +105,15 @@ public class LogParser {
         };
     }
 
-    public LocalDateTime convertStringToLocalDateTime(String in) {
-        return LocalDateTime.parse(in, formatter);
+    public Optional<LocalDateTime> convertStringToLocalDateTime(String in) {
+        Optional<LocalDateTime> dateTime;
+        try {
+            dateTime = Optional.of(LocalDateTime.parse(in, formatter));
+        }
+        catch (DateTimeParseException e) {
+            return Optional.empty();
+        }
+
+        return dateTime;
     }
 }
