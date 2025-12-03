@@ -6,9 +6,10 @@ import org.example.model.LogLevel;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.*;
 
@@ -17,22 +18,30 @@ public class LogParser {
     private final DateTimeFormatter formatter;
     private final Pattern logPattern;
 
-    LogParser(Optional<DateTimeFormatter> formatter, Optional<Pattern> logPattern) {
-        this.formatter = formatter.orElseGet(() -> DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
-        this.logPattern = logPattern.orElseGet(() -> Pattern.compile(
+    LogParser() {
+        this.formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        this.logPattern = Pattern.compile(
                 "^(?<date>\\d{2}-\\d{2}-\\d{4}) " +
                         "(?<time>\\d{2}:\\d{2}:\\d{2}) " +
                         "(?<level>\\w+) " +
                         "(?<file>[^:]+):(?<line>\\d+) " +
                         "(?<message>.*)$"
-        ));
+        );
+    }
+
+    LogParser(DateTimeFormatter formatter, Pattern logPattern) {
+        this.formatter = formatter;
+        this.logPattern = logPattern;
     }
 
     public void createJsonFromLogFile(String logFileName, String JsonFileName) {
+        List<LogEntry> logs = new ArrayList<>();
+
         try (BufferedReader br = new BufferedReader(new FileReader(logFileName))) {
             String line;
             while ((line = br.readLine()) != null) {
-                parseLine(line);
+                Optional<LogEntry> log = parseLine(line);
+                log.ifPresent(logs::add);
             }
         }
         catch (IOException e) {

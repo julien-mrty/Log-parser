@@ -15,6 +15,7 @@ public class Main {
 
         String fileName = "log_example.log";
         String output = "";
-        LogParser.createJsonFromLogFile(fileName, output);
+        LogParser logParser = new LogParser();
+        logParser.createJsonFromLogFile(fileName, output);
     }
 }
