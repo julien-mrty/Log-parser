@@ -1,5 +1,7 @@
 package org.example;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.model.LogEntry;
 import org.example.model.LogLevel;
 
@@ -52,16 +54,27 @@ public class LogParser {
         catch (IOException e) {
             System.err.println("Error reading file: " + logFileName + ", " + e);
         }
+
+        ObjectMapper mapper = ObjectMapperFactory.createObjectMapper();
+
+        StringBuilder jsonOutput = new StringBuilder();
+        for (LogEntry log : logs) {
+            try {
+                jsonOutput.append(mapper.writeValueAsString(log));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        System.out.println(jsonOutput.toString());
     }
 
     public Optional<LogEntry> parseLine(String line) {
         Matcher matcher = logPattern.matcher(line);
-
         if (!matcher.matches()) {
             System.out.println("No match found for: " + line);
             return Optional.empty();
         }
-        System.out.println("matcher.group(\"date\"): " + matcher.group("date"));
 
         Optional<LocalDateTime> dateTime = convertStringToLocalDateTime(matcher.group("date") + " " + matcher.group("time"));
         if (dateTime.isEmpty()) {
