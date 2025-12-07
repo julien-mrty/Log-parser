@@ -14,9 +14,9 @@ public class Main {
         System.out.println(formattedDate);
         */
 
-        String fileName = "log_example.log";
+        Path logFilePath = Paths.get("log_example.log");
         Path outputFilePath = Paths.get("output.json");
         LogParser logParser = new LogParser();
-        logParser.createJsonFromLogFile(fileName, outputFilePath);
+        logParser.createJsonFromLogFile(logFilePath, outputFilePath);
     }
 }

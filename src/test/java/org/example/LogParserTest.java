@@ -5,10 +5,14 @@ import org.example.model.LogEntry;
 import org.example.model.LogLevel;
 import org.junit.jupiter.api.Test;
 
+import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LogParserTest {
 
@@ -16,16 +20,16 @@ public class LogParserTest {
 
     @Test
     void readFile() {
-        String fileName = "log_example.log";
-        String output = "";
-        //LogParser.createJsonFromLogFile(fileName, output);
+        Path wrongLogFilePath = Paths.get("log_example.log");
+        Path outputFilePath = Paths.get("output.json");
+        parser.createJsonFromLogFile(wrongLogFilePath, outputFilePath);
     }
 
     @Test
     void readWrongFile() {
-        String fileName = "wrong.log";
-        String output = "";
-        //LogParser.createJsonFromLogFile(fileName, output);
+        Path wrongLogFilePath = Paths.get("wrong.log");
+        Path outputFilePath = Paths.get("wrong.json");
+        parser.createJsonFromLogFile(wrongLogFilePath, outputFilePath);
     }
 
     @Test

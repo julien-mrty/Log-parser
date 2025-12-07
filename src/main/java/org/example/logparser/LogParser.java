@@ -36,21 +36,14 @@ public class LogParser {
         );
     }
 
-    /*
-    LogParser(DateTimeFormatter formatter, Pattern logPattern) {
-        this.formatter = formatter;
-        this.logPattern = logPattern;
-    }
-    */
-
     public DateTimeFormatter getFormatter() {
         return formatter;
     }
 
-    public void createJsonFromLogFile(String logFileName, Path outputFilePath) {
+    public void createJsonFromLogFile(Path logFilePath, Path outputFilePath) {
         List<LogEntry> logs = new ArrayList<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(logFileName))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(logFilePath.toFile()))) {
             String line;
             while ((line = br.readLine()) != null) {
                 Optional<LogEntry> log = parseLine(line);
@@ -58,7 +51,7 @@ public class LogParser {
             }
         }
         catch (IOException e) {
-            System.err.println("Error reading file: " + logFileName + ", " + e);
+            System.err.println("Error reading file: " + logFilePath + ", " + e);
         }
 
         ObjectMapper mapper = ObjectMapperFactory.createObjectMapper();
