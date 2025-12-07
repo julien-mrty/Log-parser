@@ -1,8 +1,9 @@
 package org.example;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import org.example.logparser.LogParser;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
@@ -14,8 +15,8 @@ public class Main {
         */
 
         String fileName = "log_example.log";
-        String output = "";
+        Path outputFilePath = Paths.get("output.json");
         LogParser logParser = new LogParser();
-        logParser.createJsonFromLogFile(fileName, output);
+        logParser.createJsonFromLogFile(fileName, outputFilePath);
     }
 }

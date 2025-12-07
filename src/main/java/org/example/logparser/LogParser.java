@@ -1,27 +1,31 @@
-package org.example;
+package org.example.logparser;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.factory.ObjectMapperFactory;
 import org.example.model.LogEntry;
 import org.example.model.LogLevel;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LogParser {
 
     private final DateTimeFormatter formatter;
     private final Pattern logPattern;
 
-    LogParser() {
+    public LogParser() {
         this.formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         this.logPattern = Pattern.compile(
                 "^(?<date>\\d{2}-\\d{2}-\\d{4}) " +
@@ -32,16 +36,18 @@ public class LogParser {
         );
     }
 
+    /*
     LogParser(DateTimeFormatter formatter, Pattern logPattern) {
         this.formatter = formatter;
         this.logPattern = logPattern;
     }
+    */
 
     public DateTimeFormatter getFormatter() {
         return formatter;
     }
 
-    public void createJsonFromLogFile(String logFileName, String JsonFileName) {
+    public void createJsonFromLogFile(String logFileName, Path outputFilePath) {
         List<LogEntry> logs = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(logFileName))) {
@@ -56,17 +62,19 @@ public class LogParser {
         }
 
         ObjectMapper mapper = ObjectMapperFactory.createObjectMapper();
+        String jsonString;
 
-        StringBuilder jsonOutput = new StringBuilder();
-        for (LogEntry log : logs) {
-            try {
-                jsonOutput.append(mapper.writeValueAsString(log));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            jsonString = mapper.writeValueAsString(logs);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
 
-        System.out.println(jsonOutput.toString());
+        try {
+            Files.write(outputFilePath, jsonString.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Optional<LogEntry> parseLine(String line) {
@@ -76,11 +84,8 @@ public class LogParser {
             return Optional.empty();
         }
 
+        // If poorly formatted would be rejected by the pattern matcher
         Optional<LocalDateTime> dateTime = convertStringToLocalDateTime(matcher.group("date") + " " + matcher.group("time"));
-        if (dateTime.isEmpty()) {
-            System.out.println("Date/Time, incorrect format: " + line);
-            return Optional.empty();
-        }
 
         Optional<LogLevel> logLevel = convertStringToLogLevel(matcher.group("level"));
         if (logLevel.isEmpty()) {
@@ -88,14 +93,8 @@ public class LogParser {
             return Optional.empty();
         }
 
-        int lineNum;
-        try {
-            lineNum = Integer.parseInt(matcher.group("line"));
-        }
-        catch (NumberFormatException e) {
-            System.out.println("Line number, incorrect format: " + line);
-            return Optional.empty();
-        }
+        // If it isn't an int it would be rejected by the pattern matcher
+        int lineNum = Integer.parseInt(matcher.group("line"));
 
         return Optional.of(new LogEntry(
                 dateTime.get(),
