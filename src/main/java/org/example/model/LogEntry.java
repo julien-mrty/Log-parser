@@ -7,4 +7,5 @@ public record LogEntry(
         LogLevel logLevel,
         String fileName,
         int line,
-        String message) {}
+        String message) {
+}

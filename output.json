@@ -1,1 +1,16 @@
-[{"dateTime":[2025,12,2,11,14,36],"logLevel":"ERROR","fileName":"whateverfile.java","line":16,"message":"Failed to process payment"}]
+[
+  {
+    "dateTime": [
+      2025,
+      12,
+      2,
+      11,
+      14,
+      36
+    ],
+    "logLevel": "ERROR",
+    "fileName": "whateverfile.java",
+    "line": 16,
+    "message": "Failed to process payment"
+  }
+]
